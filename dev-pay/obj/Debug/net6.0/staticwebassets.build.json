@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "6rTOHUc0SuqX5Z/msu/zS9pnqvbnAMtFMUTckgmJKsY=",
+  "Source": "dev-pay",
+  "BasePath": "_content/dev-pay",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
