@@ -76,7 +76,6 @@ namespace dev_pay.Controllers
                 identifications = user.identifications,
                 token = utils.GetToken(authClaims)
             });
-            throw new NotImplementedException();
         }
 
         // POST api/<Customer>
