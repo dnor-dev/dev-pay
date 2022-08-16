@@ -78,9 +78,8 @@ namespace dev_pay.Controllers
             });
         }
 
-        // POST api/<Customer>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        [HttpPost("user/validate")]
+        public void Validate([FromBody] string value)
         {
         }
 
