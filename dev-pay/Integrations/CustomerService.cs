@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using dev_pay.Models.Customer;
 
 namespace dev_pay.Integrations
 {
@@ -35,10 +36,7 @@ namespace dev_pay.Integrations
                 last_name = customer.last_name,
                 phone = customer.phone,
             };
-            string serializedData = JsonConvert.SerializeObject(PaystackModel);
-            byte[] buffer = Encoding.UTF8.GetBytes(serializedData);
-            ByteArrayContent customerData = new ByteArrayContent(buffer);
-            customerData.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            var customerData = utils.reqData(PaystackModel);
             var res = await client.PostAsync("customer", customerData);
             if (!res.IsSuccessStatusCode)
             {
@@ -65,6 +63,33 @@ namespace dev_pay.Integrations
             };
             Customer entity = await CustomerRepository.AddAsync(createdCustomer);
             return entity;
+        }
+
+        public async Task<Response> ValidateCustomer(Customer user, ValidateModel model)
+        {
+            ByteArrayContent validateData = utils.reqData(model);
+            var res = await client.PostAsync($"customer/{user.customer_code}/identification", validateData);
+            if (!res.IsSuccessStatusCode)
+            {
+                return await res.Content.ReadAsAsync<Response>();
+            }
+            await CustomerRepository.UpdateAsync(user.email, user);
+
+            var obj = await res.Content.ReadAsAsync<Response>();
+            return obj;
+        }
+
+        public async Task<GetCustomerResponse> GetCustomerFullDetails(string? email)
+        {
+            var res = await client.GetAsync($"customer/{email}");
+            if (!res.IsSuccessStatusCode)
+            {
+                throw new Exception("Something went wrong with your request");
+            }
+
+            var obj = await res.Content.ReadAsAsync<GetCustomerResponse>();
+            
+            return obj;
         }
     }
 }

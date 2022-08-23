@@ -4,6 +4,7 @@ using dev_pay.Interfaces;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using dev_pay.Filters;
 
 namespace dev_pay.Controllers
 {
@@ -46,7 +47,7 @@ namespace dev_pay.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<Customer>> Login([FromBody] LoginModel model)
+        public async Task<ActionResult> Login([FromBody] LoginModel model)
         {
             var user = await customerRepository.GetAsync(model.email);
 
@@ -65,28 +66,38 @@ namespace dev_pay.Controllers
 
             return Ok(new
             {
-                id = user.id,
-                first_name = user.first_name,
-                last_name = user.last_name,
-                email = user.email,
-                customer_code = user.customer_code,
-                phone = user.phone,
-                integration = user.integration,
-                identified = user.identified,
-                identifications = user.identifications,
+                message = "Logged In",
                 token = utils.GetToken(authClaims)
             });
         }
 
-        [HttpPost("user/validate")]
-        public void Validate([FromBody] string value)
+        [Authorize]
+        [HttpPost("validate/{email}")]
+        public async Task<ActionResult<Response>> Validate(string email, [FromBody] ValidateModel model)
         {
+            var user = await customerRepository.GetAsync(email);
+
+            if (user is null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, new Response { message = "User not found", status = "Failed" });
+            }
+
+            var res = await CustomerService.ValidateCustomer(user, model);
+            if (res.status == "false")
+            {
+               return StatusCode(StatusCodes.Status400BadRequest, new Response { message = res.message, status = "Failed" });
+            }
+
+            return Ok(res);
         }
 
-        // PUT api/<Customer>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [TokenValidation]
+        [HttpGet]
+        public async Task<ActionResult> GetCustomer()
         {
+            var userEmail = Request.HttpContext.Items["userEmail"]?.ToString();
+            var user = await CustomerService.GetCustomerFullDetails(userEmail);
+            return Ok(user);
         }
 
         // DELETE api/<Customer>/5

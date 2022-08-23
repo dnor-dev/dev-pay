@@ -1,4 +1,4 @@
-﻿using dev_pay.Models;
+﻿using dev_pay.Models.Customer;
 
 namespace dev_pay.Interfaces
 {
@@ -7,5 +7,7 @@ namespace dev_pay.Interfaces
         Task<Customer> AddAsync(Customer customer);
 
         Task<Customer> GetAsync(string? email);
+
+        Task<Customer> UpdateAsync(string email, Customer customer);
     }
 }

@@ -2,6 +2,7 @@ using dev_pay;
 using dev_pay.DB;
 using dev_pay.Integrations;
 using dev_pay.Interfaces;
+using dev_pay.Middlewares;
 using dev_pay.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +63,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ErrorHandler>();
 
 app.MapControllers();
 

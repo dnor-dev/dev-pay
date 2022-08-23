@@ -10,5 +10,7 @@ namespace dev_pay.Interfaces
         public bool comparePasswords(string? InputPassword, string? DBPassword);
 
         public string GetToken(List<Claim> authClaims);
+
+        public ByteArrayContent reqData(dynamic obj);
     }
 }
