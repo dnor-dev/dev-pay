@@ -2,6 +2,7 @@
 using dev_pay.Interfaces;
 using dev_pay.Models;
 using dev_pay.Models.Customer;
+using dev_pay.Models.Customer.Requests;
 using Microsoft.EntityFrameworkCore;
 
 namespace dev_pay.Repository
@@ -44,6 +45,18 @@ namespace dev_pay.Repository
                 throw new KeyNotFoundException("Customer not found");
             }
             CustomerDb.Entry(oldCustomer).CurrentValues.SetValues(customer);
+            await CustomerDb.SaveChangesAsync();
+            return oldCustomer;
+        }
+
+        public async Task<Customer> UpdatePhone(string email, UpdatePhone model)
+        {
+            var oldCustomer = await GetAsync(email);
+            if (oldCustomer is null)
+            {
+                throw new KeyNotFoundException("Customer not found");
+            }
+            oldCustomer.phone = model.phone;
             await CustomerDb.SaveChangesAsync();
             return oldCustomer;
         }

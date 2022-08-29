@@ -18,12 +18,22 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
+/*CORS*/
+builder.Services.AddCors(o => o.AddPolicy("dev-pay", builder =>
+{
+    builder
+    .AllowAnyOrigin()
+    .AllowAnyHeader()
+    .AllowAnyMethod();
+}));
+
 builder.Services.AddDbContext<CustomerContext>(opt => opt.UseSqlServer(builder.Configuration["ConnectionStrings:DbURI"]));
 
 /*Interfaces*/
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IUtility, dev_pay.Utility>();
+builder.Services.AddScoped<IVTUService, VTUService>();
 
 /*JWT Auth*/
 builder.Services.AddAuthentication(options =>
@@ -57,6 +67,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("dev-pay");
 
 app.UseHttpsRedirection();
 

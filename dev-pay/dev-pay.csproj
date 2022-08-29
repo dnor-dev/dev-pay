@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>dev_pay</RootNamespace>
+    <UserSecretsId>0300bfe2-8e74-4b31-a3b1-fb218f0142e3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

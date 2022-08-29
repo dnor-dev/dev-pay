@@ -5,6 +5,9 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using dev_pay.Filters;
+using dev_pay.Models.Transaction;
+using dev_pay.Models.Admin;
+using dev_pay.Models.Customer.Requests;
 
 namespace dev_pay.Controllers
 {
@@ -66,10 +69,37 @@ namespace dev_pay.Controllers
 
             return Ok(new
             {
-                message = "Logged In",
+                status = "Success",
                 token = utils.GetToken(authClaims)
             });
         }
+
+        [TokenValidation]
+        [HttpPost]
+        [Route("/api/admin")]
+        public async Task<ActionResult> MakeTempAdmin([FromBody] AdminLogin model)
+        {
+            var user = await customerRepository.GetAsync(model.email);
+            if (user is null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+            List<Claim> authClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user?.email), 
+                new Claim(ClaimTypes.Name, user?.first_name),
+                new Claim(ClaimTypes.Role, "user"),
+                new Claim(ClaimTypes.Role, "admin"),
+                new Claim(JwtRegisteredClaimNames.Jti, user?.customer_code),
+            };
+
+            return Ok(new
+            {
+                status = "Success",
+                token = utils.GetToken(authClaims)
+            });
+        }
+
 
         [Authorize]
         [HttpPost("validate/{email}")]
@@ -79,13 +109,13 @@ namespace dev_pay.Controllers
 
             if (user is null)
             {
-                return StatusCode(StatusCodes.Status404NotFound, new Response { message = "User not found", status = "Failed" });
+                throw new KeyNotFoundException("User not found");
             }
 
             var res = await CustomerService.ValidateCustomer(user, model);
             if (res.status == "false")
             {
-               return StatusCode(StatusCodes.Status400BadRequest, new Response { message = res.message, status = "Failed" });
+                throw new ApplicationException(res.message);
             }
 
             return Ok(res);
@@ -100,10 +130,52 @@ namespace dev_pay.Controllers
             return Ok(user);
         }
 
-        // DELETE api/<Customer>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [TokenValidation]
+        [HttpPut]
+        public async Task<ActionResult> UpdatePhoneNumber([FromBody] UpdatePhone model)
         {
+            var userEmail = Request.HttpContext.Items["userEmail"]?.ToString();
+            var res = await CustomerService.UpdatePhone(userEmail, model);
+            return Ok(res);
+        }
+
+        [TokenValidation]
+        [HttpPost("transactions")]
+        public async Task<ActionResult> BuyAirtime([FromBody] InitiateTransactionModel model)
+        {
+            var res = await CustomerService.InitiateTransaction(model);
+            return Ok(res);
+        }
+
+        [TokenValidation]
+        [Admin]
+        [HttpGet("transactions")]
+        public async Task<ActionResult> AllTransactions()
+        {
+            var data = await CustomerService.GetAllTransactions();
+            return Ok(new
+            {
+                status = "Success",
+                data
+            });
+        }
+
+        [TokenValidation]
+        [Admin]
+        [HttpGet("transactions/{id}")]
+        public async Task<ActionResult> GetTransaction(int id)
+        {
+            var data = await CustomerService.GetSingleTransaction(id);
+            return Ok(data);
+        }
+
+        [TokenValidation]
+        [Admin]
+        [HttpGet("transactions/verify/{reference}")]
+        public async Task<ActionResult> VerifyTransaction(string reference)
+        {
+            var data = await CustomerService.VerifyCustomerTransaction(reference);
+            return Ok(data);
         }
     }
 }

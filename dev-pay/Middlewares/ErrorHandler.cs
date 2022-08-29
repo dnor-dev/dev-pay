@@ -45,7 +45,7 @@ namespace dev_pay.Middlewares
                         break;                  
                 }
 
-                var result = JsonSerializer.Serialize(new { message = error?.Message });
+                var result = JsonSerializer.Serialize(new { status = "Failed", message = error?.Message });
                 await response.WriteAsync(result);
             }
         }
