@@ -4,6 +4,10 @@ using dev_pay.Interfaces;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using dev_pay.Filters;
+using dev_pay.Models.Transaction;
+using dev_pay.Models.Admin;
+using dev_pay.Models.Customer.Requests;
 
 namespace dev_pay.Controllers
 {
@@ -46,7 +50,7 @@ namespace dev_pay.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<Customer>> Login([FromBody] LoginModel model)
+        public async Task<ActionResult> Login([FromBody] LoginModel model)
         {
             var user = await customerRepository.GetAsync(model.email);
 
@@ -65,34 +69,113 @@ namespace dev_pay.Controllers
 
             return Ok(new
             {
-                id = user.id,
-                first_name = user.first_name,
-                last_name = user.last_name,
-                email = user.email,
-                customer_code = user.customer_code,
-                phone = user.phone,
-                integration = user.integration,
-                identified = user.identified,
-                identifications = user.identifications,
+                status = "Success",
                 token = utils.GetToken(authClaims)
             });
         }
 
-        [HttpPost("user/validate")]
-        public void Validate([FromBody] string value)
+        [TokenValidation]
+        [HttpPost]
+        [Route("/api/admin")]
+        public async Task<ActionResult> MakeTempAdmin([FromBody] AdminLogin model)
         {
+            var user = await customerRepository.GetAsync(model.email);
+            if (user is null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+            List<Claim> authClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, user?.email), 
+                new Claim(ClaimTypes.Name, user?.first_name),
+                new Claim(ClaimTypes.Role, "user"),
+                new Claim(ClaimTypes.Role, "admin"),
+                new Claim(JwtRegisteredClaimNames.Jti, user?.customer_code),
+            };
+
+            return Ok(new
+            {
+                status = "Success",
+                token = utils.GetToken(authClaims)
+            });
         }
 
-        // PUT api/<Customer>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+
+        [Authorize]
+        [HttpPost("validate/{email}")]
+        public async Task<ActionResult<Response>> Validate(string email, [FromBody] ValidateModel model)
         {
+            var user = await customerRepository.GetAsync(email);
+
+            if (user is null)
+            {
+                throw new KeyNotFoundException("User not found");
+            }
+
+            var res = await CustomerService.ValidateCustomer(user, model);
+            if (res.status == "false")
+            {
+                throw new ApplicationException(res.message);
+            }
+
+            return Ok(res);
         }
 
-        // DELETE api/<Customer>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [TokenValidation]
+        [HttpGet]
+        public async Task<ActionResult> GetCustomer()
         {
+            var userEmail = Request.HttpContext.Items["userEmail"]?.ToString();
+            var user = await CustomerService.GetCustomerFullDetails(userEmail);
+            return Ok(user);
+        }
+
+        [TokenValidation]
+        [HttpPut]
+        public async Task<ActionResult> UpdatePhoneNumber([FromBody] UpdatePhone model)
+        {
+            var userEmail = Request.HttpContext.Items["userEmail"]?.ToString();
+            var res = await CustomerService.UpdatePhone(userEmail, model);
+            return Ok(res);
+        }
+
+        [TokenValidation]
+        [HttpPost("transactions")]
+        public async Task<ActionResult> BuyAirtime([FromBody] InitiateTransactionModel model)
+        {
+            var res = await CustomerService.InitiateTransaction(model);
+            return Ok(res);
+        }
+
+        [TokenValidation]
+        [Admin]
+        [HttpGet("transactions")]
+        public async Task<ActionResult> AllTransactions()
+        {
+            var data = await CustomerService.GetAllTransactions();
+            return Ok(new
+            {
+                status = "Success",
+                data
+            });
+        }
+
+        [TokenValidation]
+        [Admin]
+        [HttpGet("transactions/{id}")]
+        public async Task<ActionResult> GetTransaction(int id)
+        {
+            var data = await CustomerService.GetSingleTransaction(id);
+            return Ok(data);
+        }
+
+        [TokenValidation]
+        [Admin]
+        [HttpGet("transactions/verify/{reference}")]
+        public async Task<ActionResult> VerifyTransaction(string reference)
+        {
+            var data = await CustomerService.VerifyCustomerTransaction(reference);
+            return Ok(data);
         }
     }
 }

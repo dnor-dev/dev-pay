@@ -1,7 +1,9 @@
 ﻿using BCrypt.Net;
 using dev_pay.Interfaces;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 
@@ -39,6 +41,15 @@ namespace dev_pay
                 );
             var registeredToken = new JwtSecurityTokenHandler().WriteToken(token);
             return registeredToken;
+        }
+
+        public ByteArrayContent reqData(dynamic obj)
+        {
+            string serializedData = JsonConvert.SerializeObject(obj);
+            byte[] buffer = Encoding.UTF8.GetBytes(serializedData);
+            ByteArrayContent data = new ByteArrayContent(buffer);
+            data.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            return data;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using dev_pay.Models;
+﻿using dev_pay.Models.Customer;
 using Microsoft.EntityFrameworkCore;
 
 namespace dev_pay.DB
