@@ -30,8 +30,9 @@ builder.Services.AddCors(o => o.AddPolicy("dev-pay", builder =>
 builder.Services.AddDbContext<CustomerContext>(opt => opt.UseSqlServer(builder.Configuration["ConnectionStrings:DbURI"]));
 
 /*Interfaces*/
-builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IPaystackService, PaystackService>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IUtility, dev_pay.Utility>();
 builder.Services.AddScoped<IVTUService, VTUService>();
 

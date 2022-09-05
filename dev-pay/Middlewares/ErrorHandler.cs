@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System.Net;
+﻿using System.Net;
 using System.Text.Json;
 
 namespace dev_pay.Middlewares
@@ -21,7 +18,7 @@ namespace dev_pay.Middlewares
             {
                 await _next(httpContext);
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 var response = httpContext.Response;
                 response.ContentType = "application/json";
@@ -42,7 +39,7 @@ namespace dev_pay.Middlewares
 
                     default:
                         response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        break;                  
+                        break;
                 }
 
                 var result = JsonSerializer.Serialize(new { status = "Failed", message = error?.Message });

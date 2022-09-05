@@ -14,7 +14,7 @@
         public string? domain { get; set; }
         public string? status { get; set; }
         public string? reference { get; set; }
-        public int? amount { get; set; }
+        public int amount { get; set; }
         public string? message { get; set; }
         public string? gateway_response { get; set; }
         public string? paid_at { get; set; }
