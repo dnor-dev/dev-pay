@@ -11,5 +11,6 @@ namespace dev_pay.Interfaces
 
         Task<Customer> UpdateAsync(string email, Customer customer);
         Task<Customer> UpdatePhone(string email, UpdatePhone phone);
+        Task<Customer> UpdatePassword(string? email, string? NewPassword);
     }
 }
