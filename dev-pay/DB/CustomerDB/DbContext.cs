@@ -1,4 +1,5 @@
-﻿using dev_pay.Models;
+﻿using dev_pay.Models.Customer;
+using dev_pay.Models.Transaction;
 using Microsoft.EntityFrameworkCore;
 
 namespace dev_pay.DB
@@ -11,5 +12,6 @@ namespace dev_pay.DB
         }
 
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<TransactionDBModel> Transactions { get; set; }
     }
 }

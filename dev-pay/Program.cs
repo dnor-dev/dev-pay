@@ -2,6 +2,7 @@ using dev_pay;
 using dev_pay.DB;
 using dev_pay.Integrations;
 using dev_pay.Interfaces;
+using dev_pay.Middlewares;
 using dev_pay.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -17,12 +18,23 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 
+/*CORS*/
+builder.Services.AddCors(o => o.AddPolicy("dev-pay", builder =>
+{
+    builder
+    .AllowAnyOrigin()
+    .AllowAnyHeader()
+    .AllowAnyMethod();
+}));
+
 builder.Services.AddDbContext<CustomerContext>(opt => opt.UseSqlServer(builder.Configuration["ConnectionStrings:DbURI"]));
 
 /*Interfaces*/
-builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<IPaystackService, PaystackService>();
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IUtility, dev_pay.Utility>();
+builder.Services.AddScoped<IVTUService, VTUService>();
 
 /*JWT Auth*/
 builder.Services.AddAuthentication(options =>
@@ -57,11 +69,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("dev-pay");
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseMiddleware<ErrorHandler>();
 
 app.MapControllers();
 

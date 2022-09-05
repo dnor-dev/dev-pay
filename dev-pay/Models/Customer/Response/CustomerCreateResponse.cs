@@ -1,9 +1,10 @@
-﻿namespace dev_pay.Models
+﻿namespace dev_pay.Models.Customer
 {
     public class CustomerCreateResponse
     {
-        public Boolean status { get; set; }
+        public bool status { get; set; }
         public string message { get; set; }
         public Customer data { get; set; }
     }
 }
+

@@ -22,7 +22,7 @@ namespace dev_pay.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("dev_pay.Models.Customer", b =>
+            modelBuilder.Entity("dev_pay.Models.Customer.Customer", b =>
                 {
                     b.Property<int>("id")
                         .ValueGeneratedOnAdd()
@@ -61,7 +61,7 @@ namespace dev_pay.Migrations
                     b.ToTable("Customers");
                 });
 
-            modelBuilder.Entity("dev_pay.Models.Identifications", b =>
+            modelBuilder.Entity("dev_pay.Models.Customer.Identifications", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -86,14 +86,30 @@ namespace dev_pay.Migrations
                     b.ToTable("Identifications");
                 });
 
-            modelBuilder.Entity("dev_pay.Models.Identifications", b =>
+            modelBuilder.Entity("dev_pay.Models.Transaction.TransactionDB", b =>
                 {
-                    b.HasOne("dev_pay.Models.Customer", null)
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("Reference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("dev_pay.Models.Customer.Identifications", b =>
+                {
+                    b.HasOne("dev_pay.Models.Customer.Customer", null)
                         .WithMany("identifications")
                         .HasForeignKey("Customerid");
                 });
 
-            modelBuilder.Entity("dev_pay.Models.Customer", b =>
+            modelBuilder.Entity("dev_pay.Models.Customer.Customer", b =>
                 {
                     b.Navigation("identifications");
                 });

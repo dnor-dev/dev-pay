@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace dev_pay.Models
+namespace dev_pay.Models.Customer
 {
     public class Customer
     {
         public int id { get; set; }
 
-        [Required(ErrorMessage = "First name is required" )]
+        [Required(ErrorMessage = "First name is required")]
         public string? first_name { get; set; }
 
         public string? last_name { get; set; }
@@ -22,9 +22,9 @@ namespace dev_pay.Models
 
         public string? customer_code { get; set; }
 
-        public Identifications[]? identifications { get; set; } 
+        public Identifications[]? identifications { get; set; }
 
-        public Boolean? identified { get; set; }
+        public bool? identified { get; set; }
 
         public int? integration { get; set; }
     }
